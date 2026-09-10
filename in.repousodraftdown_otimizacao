@@ -1,0 +1,301 @@
+###################################Header for General commands#######################################################
+
+atom_style    granular # define partículas granulares
+atom_modify   map array # otimiza mapeamento dos átomos
+boundary      f f f # fronteiras fixas nas três direções
+units         si # usa unidades SI
+communicate   single vel yes # comunica velocidades entre processadores
+newton        off # desativa terceira lei para contatos granulares
+processors    1 1 2 # decomposição MPI no eixo Z, direção da abertura do draftdown
+
+# Para rodar o LIGGGHTS:
+# mpirun -np 4 liggghts -in in.caracte
+
+###################################System variables##################################################################
+
+variable    xmin    index    -1.5 # limite mínimo em x
+variable    xmax    index     1.5 # limite máximo em x
+
+variable    ymin    index    -1.0 # limite mínimo em y
+variable    ymax    index     7.5 # limite máximo em y
+
+variable    zmin    index    -1.5 # limite mínimo em z
+variable    zmax    index     1.5 # limite máximo em z
+
+variable dt equal 1e-5 # passo de tempo da simulação
+
+# Fórmula para aproximar dt
+# dt = 0.2 * (pi * R * sqrt(rho / (Y / (2 * (1 + nu))))) / (0.1631 * nu + 0.8766)
+# dt: timestep (s) | R: menor raio (m) | rho: densidade (kg/m3) | Y: Módulo de Young (Pa) | nu: Poisson
+
+###################################Variáveis específicas da simulação################################################
+
+variable natoms equal 4 # número de tipos de materiais
+
+
+#### Young Modulus ####
+
+variable youngmodulus1 equal 1e8 # módulo de Young do tipo 1
+variable youngmodulus2 equal 1e8 # módulo de Young do tipo 2
+variable youngmodulus3 equal 1e8 # módulo de Young do tipo 3
+variable youngmodulus4 equal 1e8 # módulo de Young do tipo 4
+
+
+#### Poisson ratio ####
+
+variable poisson1 equal 0.3 # coeficiente de Poisson do tipo 1
+variable poisson2 equal 0.3 # coeficiente de Poisson do tipo 2
+variable poisson3 equal 0.3 # coeficiente de Poisson do tipo 3
+variable poisson4 equal 0.3 # coeficiente de Poisson do tipo 4
+
+
+#### Coefficient of restitution ####
+
+variable 	CoR11 equal 0.10
+variable 	CoR12 equal 0.10
+variable 	CoR13 equal 0.30
+variable 	CoR14 equal 0.10
+variable 	CoR21 equal ${CoR12}
+variable 	CoR22 equal 0.1
+variable 	CoR23 equal 0.1
+variable 	CoR24 equal 0.1
+variable 	CoR31 equal ${CoR13}
+variable 	CoR32 equal ${CoR23}
+variable 	CoR33 equal 0.1
+variable 	CoR34 equal 0.1
+variable 	CoR41 equal ${CoR14}
+variable 	CoR42 equal ${CoR24}
+variable 	CoR43 equal ${CoR34}
+variable 	CoR44 equal 0.1
+
+#### Sliding friction coefficient ####
+
+variable    sf11    equal    0.95 # atrito deslizante tipo 1 com tipo 1
+variable    sf12    equal    0.426 # partícula-geometria fixa
+variable    sf13    equal    0.55 # partícula-correia/tambor
+variable    sf14    equal    0.0 # atrito deslizante tipo 1 com tipo 4
+variable    sf21    equal    ${sf12} # atrito simétrico 2 com 1
+variable    sf22    equal    0.0 # atrito deslizante tipo 2 com tipo 2
+variable    sf23    equal    0.0 # atrito deslizante tipo 2 com tipo 3
+variable    sf24    equal    0.0 # atrito deslizante tipo 2 com tipo 4
+variable    sf31    equal    ${sf13} # atrito simétrico 3 com 1
+variable    sf32    equal    ${sf23} # atrito simétrico 3 com 2
+variable    sf33    equal    0.0 # atrito deslizante tipo 3 com tipo 3
+variable    sf34    equal    0.0 # atrito deslizante tipo 3 com tipo 4
+variable    sf41    equal    ${sf14} # atrito simétrico 4 com 1
+variable    sf42    equal    ${sf24} # atrito simétrico 4 com 2
+variable    sf43    equal    ${sf34} # atrito simétrico 4 com 3
+variable    sf44    equal    0.0 # atrito deslizante tipo 4 com tipo 4
+
+
+#### Rolling friction coefficient ####
+
+variable    rf11    equal    0.25 # atrito de rolamento tipo 1 com tipo 1
+variable    rf12    equal    0.15 # atrito de rolamento tipo 1 com tipo 2
+variable    rf13    equal    0.25 # atrito de rolamento tipo 1 com tipo 3
+variable    rf14    equal    0.0 # atrito de rolamento tipo 1 com tipo 4
+variable    rf21    equal    ${rf12} # atrito simétrico 2 com 1s
+variable    rf22    equal    0.0 # atrito de rolamento tipo 2 com tipo 2
+variable    rf23    equal    0.0 # atrito de rolamento tipo 2 com tipo 3
+variable    rf24    equal    0.0 # atrito de rolamento tipo 2 com tipo 4
+variable    rf31    equal    ${rf13} # atrito simétrico 3 com 1
+variable    rf32    equal    ${rf23} # atrito simétrico 3 com 2
+variable    rf33    equal    0.0 # atrito de rolamento tipo 3 com tipo 3
+variable    rf34    equal    0.0 # atrito de rolamento tipo 3 com tipo 4
+variable    rf41    equal    ${rf14} # atrito simétrico 4 com 1
+variable    rf42    equal    ${rf24} # atrito simétrico 4 com 2
+variable    rf43    equal    ${rf34} # atrito simétrico 4 com 3
+variable    rf44    equal    0.0 # atrito de rolamento tipo 4 com tipo 4
+
+####cohesivity energy density####	
+					
+variable	CED11	equal	1e3 #interação particula-particula: dados advindos da calibração "repouso e cisalhamento" 
+variable	CED12	equal	0
+variable	CED13	equal	0
+variable	CED14	equal	0.0			
+variable	CED21	equal	${CED12}			
+variable	CED22	equal	0.0	
+variable	CED23	equal	0.0
+variable	CED24	equal	0.0
+variable	CED31	equal	${CED13}
+variable	CED32	equal	${CED23}
+variable	CED33	equal	0.0
+variable	CED34	equal	0.0
+variable	CED41	equal	${CED14}
+variable	CED42	equal	${CED24}				
+variable	CED43	equal	${CED34}
+variable	CED44	equal	0.0
+
+
+#### Variáveis para as partículas ####
+
+### SEMPRE COLOCAR DO MENOR RAIO PARA O MAIOR!!!!!
+
+#variable radiusnbr equal 0.0063/2 #Tamanho original
+variable radiusnbr equal 0.0063/2 #Tamanho otimizado
+
+variable nradii equal 1 # número de classes granulométricas
+
+variable scalpartic equal 1 # fator de escala dos raios
+
+variable frac1 equal 1 # fração mássica da classe 1
+
+variable radius1 equal (0.005/2)*${scalpartic} # raio da classe 1
+
+variable density equal 4829 # densidade da partícula
+
+variable nbrratio equal v_radius1/v_radiusnbr # razão das partículas para o valor da NBR
+
+
+#### Parâmetros de alimentação do sistema ####
+
+variable simulationtime equal 20.0 # tempo total da simulação
+variable filltime equal 1.0 # tempo de alimentação das partículas
+variable fillmassrateth equal 0.008*0.58*v_density*v_nbrratio*v_nbrratio*v_nbrratio # vazão mássica escalada em t/h
+variable fillmassrate equal ${fillmassrateth}/3.6 # vazão mássica convertida para kg/s
+variable fillmass equal ${filltime}*${fillmassrate} # massa total inserida durante a alimentação
+variable fillsteps equal ${filltime}/${dt} # número de passos da alimentação
+
+#### Movimentos ####
+
+variable v_mov equal 0.025*v_nbrratio # velocidade comum do tubo e das bases
+
+
+### Movimento do tubo ###
+
+variable tempo_inicio_subida_tubo equal 3.0 # instante de início da subida do tubo
+variable desloc_tubo_y equal 10.0*v_v_mov # deslocamento do tubo durante 10 segundos
+variable v_tubo_y equal v_v_mov # velocidade do tubo no sentido positivo de Y
+variable tempo_subida_tubo equal v_desloc_tubo_y/v_v_tubo_y # duração da subida do tubo
+variable tempo_fim_subida_tubo equal v_tempo_inicio_subida_tubo+v_tempo_subida_tubo # instante final da subida do tubo
+variable steps_ate_subida_tubo equal (v_tempo_inicio_subida_tubo-v_filltime)/v_dt # passos entre o fim da alimentação e o início da subida
+variable steps_tubo_subida equal v_tempo_subida_tubo/v_dt # número de passos da subida do tubo
+
+
+### Movimento das bases ###
+
+variable desloc_base_z equal 0.02*v_nbrratio # deslocamento individual de cada metade da base
+variable v_base_z equal 0.01*v_nbrratio # velocidade das bases igual à velocidade do tubo
+variable v_base_esq_z equal -v_v_base_z # velocidade da base esquerda no sentido negativo de Z
+variable v_base_dir_z equal v_v_base_z # velocidade da base direita no sentido positivo de Z
+variable tempo_movimento_bases equal v_desloc_base_z/v_v_base_z # duração do movimento das bases
+variable steps_movimento_bases equal v_tempo_movimento_bases/v_dt # número de passos do movimento das bases
+
+
+### Tempo restante da simulação ###
+
+variable tempo_fim_movimento_bases equal v_tempo_fim_subida_tubo+v_tempo_movimento_bases # instante em que as bases terminam de abrir
+variable tempo_drawdown equal v_simulationtime-v_tempo_fim_movimento_bases # tempo restante para observar o drawdown
+variable steps_drawdown equal v_tempo_drawdown/v_dt # número de passos restantes até completar 20 segundos
+
+###################################Definition of simulation box#######################################################
+
+region reg block $(v_xmin*v_nbrratio) $(v_xmax*v_nbrratio) $(v_ymin*v_nbrratio) $(v_ymax*v_nbrratio) $(v_zmin*v_nbrratio) $(v_zmax*v_nbrratio) units box # cria região da simulação
+create_box ${natoms} reg # cria caixa com tipos de átomos
+
+variable neighborskin equal 1.2*v_radius1
+neighbor ${neighborskin} bin
+neigh_modify delay 0 every 1 check yes
+
+
+###################################Contact Models - Liquid Bridge####################################################
+
+pair_style gran model hertz tangential history cohesion sjkr rolling_friction epsd2
+
+pair_coeff * * # aplica modelo a todos os pares
+
+timestep ${dt} # define passo de tempo
+
+fix integrator all nve/sphere # integra movimento das esferas
+fix gravi all gravity 9.81 vector 0.0 -1.0 0.0 # aplica gravidade em y negativo
+
+
+###################################Definition of Material properties#################################################
+
+fix m1 all property/global youngsModulus peratomtype ${youngmodulus1} ${youngmodulus2} ${youngmodulus3} ${youngmodulus4} # define módulos de Young
+
+fix m2 all property/global poissonsRatio peratomtype ${poisson1} ${poisson2} ${poisson3} ${poisson4} # define coeficientes de Poisson
+
+fix m3 all property/global coefficientRestitution peratomtypepair ${natoms} ${CoR11} ${CoR12} ${CoR13} ${CoR14} ${CoR21} ${CoR22} ${CoR23} ${CoR24} ${CoR31} ${CoR32} ${CoR33} ${CoR34} ${CoR41} ${CoR42} ${CoR43} ${CoR44} # define restituição entre tipos
+
+fix m4 all property/global coefficientFriction peratomtypepair ${natoms} ${sf11} ${sf12} ${sf13} ${sf14} ${sf21} ${sf22} ${sf23} ${sf24} ${sf31} ${sf32} ${sf33} ${sf34} ${sf41} ${sf42} ${sf43} ${sf44} # define atrito deslizante
+
+fix m5 all property/global coefficientRollingFriction peratomtypepair ${natoms} ${rf11} ${rf12} ${rf13} ${rf14} ${rf21} ${rf22} ${rf23} ${rf24} ${rf31} ${rf32} ${rf33} ${rf34} ${rf41} ${rf42} ${rf43} ${rf44} # define atrito de rolamento
+
+fix m6 all property/global cohesionEnergyDensity peratomtypepair ${natoms} ${CED11} ${CED12} ${CED13} ${CED14} ${CED21} ${CED22} ${CED23} ${CED24} ${CED31} ${CED32} ${CED33} ${CED34} ${CED41} ${CED42} ${CED43} ${CED44} # define energia de coesão
+
+###################################Generation and Loading of the Geometry .stl#######################################
+
+fix tubo all mesh/surface file meshes/tubo.stl type 4 scale $(1*v_nbrratio) # carrega a geometria do tubo
+
+fix base_repouso_esq all mesh/surface file meshes/base_repouso_esq.stl type 2 scale $(1*v_nbrratio) # carrega a metade esquerda da base
+
+fix base_repouso_dir all mesh/surface file meshes/base_repouso_dir.stl type 2 scale $(1*v_nbrratio) # carrega a metade direita da base
+
+fix walls all wall/gran model hertz tangential history cohesion sjkr rolling_friction epsd2 mesh n_meshes 3 meshes tubo base_repouso_esq base_repouso_dir
+
+###################################Generation and Insertion of the particles#########################################
+
+fix    pts1    all particletemplate/sphere 10487 atom_type 1 density constant ${density} radius constant ${radius1} # template da classe 1
+
+fix pdd1 all particledistribution/discrete 86028121 ${nradii} pts1 ${frac1} # distribuiçãso granulométrica
+
+fix    ins_mesh all mesh/surface/planar file meshes/inlet.stl type 1 scale $(1*v_nbrratio) # carrega superfície de inserção
+
+fix ins all insert/stream seed 86028157 distributiontemplate pdd1 mass ${fillmass} massrate ${fillmassrate} overlapcheck yes all_in yes vel constant 0 -1 0 insertion_face ins_mesh extrude_length $(1*v_nbrratio) # insere partículas por fluxo
+
+
+###################################Dumping of the data for post-processing to visualize##############################
+
+shell "mkdir -p post" # cria a pasta de pós-processamento
+
+variable dumptime equal 0.1 # intervalo de tempo entre arquivos de saída
+variable dumpstep equal ${dumptime}/${dt} # número de passos entre arquivos de saída
+
+dump dmpparticle all custom/vtk ${dumpstep} post/particles_*.vtk id type x y z vx vy vz omegax omegay omegaz radius mass # salva as partículas em formato VTK
+
+dump dmptubo all mesh/stl ${dumpstep} post/tubo_*.stl tubo # salva a posição do tubo
+
+dump dmpbase_repouso_esq all mesh/stl ${dumpstep} post/base_repouso_esq_*.stl base_repouso_esq # salva a posição da base esquerda
+
+dump dmpbase_repouso_dir all mesh/stl ${dumpstep} post/base_repouso_dir_*.stl base_repouso_dir # salva a posição da base direita
+
+
+###################################Restart automático################################################################
+
+shell "mkdir -p restart" # cria pasta de restart
+
+variable bkpsavetime equal 1 # intervalo de backup
+variable bkpstep equal ${bkpsavetime}/${dt} # passos entre backups
+
+restart ${bkpstep} restart/restart_*.bin # salva arquivos de restart
+
+
+####################################RUN the simulation###############################################################
+
+run ${fillsteps} # executa a alimentação das partículas de 0 a 1 segundo
+
+unfix ins # encerra a inserção das partículas
+
+run ${steps_ate_subida_tubo} # mantém o sistema parado de 1 a 3 segundos
+
+fix move_tubo all move/mesh mesh tubo linear 0.0 ${v_tubo_y} 0.0 # inicia a subida do tubo no sentido positivo de Y
+
+run ${steps_tubo_subida} # movimenta o tubo de 3 a 13 segundos
+
+unfix move_tubo # encerra o movimento do tubo em 13 segundos
+
+fix move_base_esq all move/mesh mesh base_repouso_esq linear 0.0 0.0 ${v_base_esq_z} # movimenta a base esquerda no sentido negativo de Z
+
+fix move_base_dir all move/mesh mesh base_repouso_dir linear 0.0 0.0 ${v_base_dir_z} # movimenta a base direita no sentido positivo de Z
+
+run ${steps_movimento_bases} # abre as bases de 13 a 15 segundos
+
+unfix move_base_esq # encerra o movimento da base esquerda
+
+unfix move_base_dir # encerra o movimento da base direita
+
+run ${steps_drawdown} # observa o desenvolvimento do drawdown de 15 a 20 segundos
+
+write_restart restart/restart.final # salva o estado final da simulação em 20 segundos
+
