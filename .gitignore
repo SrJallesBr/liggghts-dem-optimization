@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+trials/
+post/
+restart/
+controlador.log
+resultados.csv
+ANALISE_DOE.json
+MELHOR_RESULTADO.json
+*.vtk
+*.dump
+*.restart
+
