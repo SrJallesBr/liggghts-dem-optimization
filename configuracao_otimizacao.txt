@@ -1,0 +1,24 @@
+{
+  "target_repose_deg": 30.0,
+  "target_drawdown_deg": 45.0,
+  "tolerance_deg": 1.0,
+  "mpi_processes_per_trial": 2,
+  "parallel_trials": 6,
+  "max_trials": 48,
+  "doe_trials": 30,
+  "refinement_trials": 12,
+  "validation_trials": 6,
+  "model_candidate_pool": 1500,
+  "random_seed": 20260910,
+  "parameters": {
+    "sf11":  {"min": 0.50, "max": 1.20, "initial": 0.95},
+    "rf11":  {"min": 0.05, "max": 0.50, "initial": 0.25},
+    "rf12":  {"min": 0.05, "max": 0.40, "initial": 0.15},
+    "CED11": {"min": 0.0,  "max": 5000.0, "initial": 1000.0}
+  },
+  "parameter_groups": {
+    "repose": ["rf11", "rf12"],
+    "drawdown": ["sf11", "CED11"]
+  }
+}
+
