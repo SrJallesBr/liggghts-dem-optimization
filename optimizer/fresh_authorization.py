@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 
 SCOPE = 'fresh-independent-finite-doe84-retry420-cap1000-20-v1'
-MANIFEST_SHA256 = '6ccf8cb2d2489729f3320b3e48a361aa831102e1acf6ca6cb7ea1457dc0af1b7'
+MANIFEST_SHA256 = '101f8604b6159e9280cd0a926b6a95cf18406cd12a17f9bde7a025b9feb30fa3'
 
 
 def artifact_hash(path, rel):

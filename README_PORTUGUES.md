@@ -1,6 +1,7 @@
-# DEM empresa — campanha nova, finita e independente
+# Otimização DEM — versão oficial
 
-Este pacote substitui a preparação anterior. O ponto de entrada é somente
+Esta é a versão oficial do repositório `SrJallesBr/liggghts-dem-optimization`,
+publicada na branch `main`. O ponto de entrada é somente
 `runtime/run_fresh_finite.py`. Extraia em uma pasta NOVA, fora da campanha
 antiga; não sobreponha arquivos. Nenhum resultado, journal, autorização ou
 estado de execução da campanha antiga é incluído/importado. Os modelos,
@@ -88,7 +89,7 @@ para retomar. O ZIP entregue não contém essa pasta nem resultados sintéticos.
 Testes offline reproduzíveis, sem lançar o solver de produção:
 
 ```sh
-python3 -m unittest discover -s tests -p 'test_fresh*.py' -v
+OPENBLAS_NUM_THREADS=1 python3 -m unittest discover -s tests -p 'test*.py' -v
 ```
 
 Os testes usam respostas sintéticas e um subprocesso-fixture explicitamente
@@ -98,3 +99,20 @@ identificado, além de exercitar o modelo substituto real. Não comprovam
 
 Os modelos físicos existentes foram preservados. Não foi executada campanha
 DEM de produção nem preparada/validada a instalação da empresa.
+
+## Versão oficial e atualização
+
+Consulte `VERSAO_OFICIAL.md` para o escopo desta publicação. Os nomes internos
+`fresh`, `finite` e `future_repose_overlay` identificam o isolamento, os limites
+e a proveniência do protocolo; não são rótulos de versão temporária.
+Os arquivos de proveniência e as guardas científicas são mantidos integralmente.
+
+Para monitorar a campanha, abra outra aba no mesmo ambiente e execute:
+
+```sh
+python3 runtime/monitor_campaign.py
+```
+
+Não use os launchers da antiga `main`: foram substituídos pelo ponto de entrada
+acima. Não atualize arquivos dentro de uma campanha em execução. A promoção no
+GitHub não instala, inicia, interrompe nem migra campanhas existentes.

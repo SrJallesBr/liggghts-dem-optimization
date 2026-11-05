@@ -21,7 +21,7 @@
 
 Esta mudança NÃO altera o processo Python que já está em execução. NÃO extraia a atualização nem substitua módulos enquanto a campanha estiver rodando: há imports tardios, e misturar versões seria inseguro. Nenhuma campanha ativa foi parada ou reiniciada para produzir esta entrega.
 
-O ZIP de atualização contém apenas os módulos alterados, manifesto/âncora atualizados, os testes afetados e esta nota. Destina-se exclusivamente à MESMA cópia `DEM_empresa20_fresh_FINITE` da entrega anterior, nunca a outras campanhas. Não contém `run/`, estado ou resultados.
+A branch `main` contém a versão oficial completa, sem `run/`, estado ou resultados de campanhas. O ZIP parcial distribuído anteriormente é um artefato histórico de atualização, destinado exclusivamente à cópia `DEM_empresa20_fresh_FINITE` daquela entrega; não substitui a distribuição oficial completa. Não aplique esse ZIP a outras campanhas.
 
 Quando houver uma janela segura, com controlador E solvers encerrados de forma controlada e os casos em voo reconciliados, faça backup da cópia completa antes de aplicar a atualização. Preserve `run/`, configuração, manifestos DOE e todos os resultados. Não remova reservas ou locks para forçar retomada.
 
