@@ -1,0 +1,60 @@
+{
+  "source_files_sha256": {
+    "C:\\DEM\\rolling_review_20261020\\caracterizacao_05\\collective05_instant_release_20261022\\simplified_95moving\\preparation\\in.fill_1s": "63d490e4b2cdae8dca65abf8ee4da2cf31332a6037437c511515f0e65f825f5e",
+    "C:\\DEM\\rolling_review_20261020\\caracterizacao_05\\collective05_instant_release_20261022\\simplified_95moving\\preparation\\in.characterization": "6cb5be8e6d79e848186af914658a7bab4e17ecd6481886d489b88b1cdb738466",
+    "C:\\DEM\\rolling_review_20261020\\caracterizacao_05\\collective05_instant_release_20261022\\simplified_95moving\\preparation\\meshes\\base.stl": "9f6d4ddef1f97c50a1e18448e80f71c3eb5967bcc56129facbfb1b1dd740b864",
+    "C:\\DEM\\rolling_review_20261020\\caracterizacao_05\\collective05_instant_release_20261022\\simplified_95moving\\preparation\\meshes\\copo.stl": "b0a3ae7cb97c7f52fffcff623f90541e33bea72ce39302fb3116e41522242d3f",
+    "C:\\DEM\\rolling_review_20261020\\caracterizacao_05\\collective05_instant_release_20261022\\simplified_95moving\\preparation\\meshes\\inlet.stl": "efdb84c5d0308c894f03e88710698f2ee3a4f2b507f5842ccfcbe572f35ef867"
+  },
+  "historic_protocol_is_lossy_not_validation": true,
+  "changes": [
+    "six factors; no change to particle material parameters",
+    "fresh per-trial feed 0 to 1 s; baseline N0 at 1 s",
+    "settle 1 to 3 s; lift full validated scaled mesh y height 3 to 6 s; rest 6 to 10 s",
+    "gravity rotation 10 to 40 s, 3 deg/s, upper limit 90 deg",
+    "one strict total-speed >0.001 m/s vote per grain; first sampled 95% of particles present (alive > 0) ends input; N0 tracks losses/integrity",
+    "1000-step sample cadence (0.1 s); losses logged and never count as moving",
+    "only verified event particle dump retained after real image and durable audit",
+    "V7_PRESENT_POPULATION changes only fraction denominator; historical V6 and earlier remain fixed-N0."
+  ],
+  "rolling_protocol": {
+    "version": "V7_PRESENT_POPULATION",
+    "speed_threshold_m_s": 0.001,
+    "fraction_threshold": 0.95,
+    "consecutive_samples": 1,
+    "retention": "validated-event-image-v1",
+    "settle_s": [
+      1,
+      3
+    ],
+    "lift_s": [
+      3,
+      6
+    ],
+    "tilt_s": [
+      10,
+      40
+    ],
+    "tilt_rate_deg_s": 3.0,
+    "maximum_angle_deg": 90.0,
+    "early_stop": true,
+    "rest_s": [
+      6,
+      10
+    ],
+    "lift_speed_m_s": 0.4999999888241291,
+    "fraction_denominator": "present_population",
+    "mesh_y_bounds_m": [
+      0.0,
+      0.05999999865889549
+    ],
+    "mesh_scale": 25.0,
+    "effective_height_m": 1.4999999664723873,
+    "mesh_sha256": "b0a3ae7cb97c7f52fffcff623f90541e33bea72ce39302fb3116e41522242d3f"
+  },
+  "current_protocol_files_sha256": {
+    "in.fill_1s": "141df5fd714b5bbcc7b5fc2feb19c3794e41231d0d8944386356c528ecc75f1e",
+    "in.rolamento": "c7d314e4708e15102e1a32a5c3a7d50a8a4b0fd18059314203f96b334019fa4e",
+    "rolling_event_check.inc": "e2e3ff15272de1f59110a6719064122b263ad7e74e64f617f702ab49a4823f6f"
+  }
+}

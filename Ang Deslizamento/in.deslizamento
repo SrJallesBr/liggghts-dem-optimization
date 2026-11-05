@@ -1,0 +1,284 @@
+###################################Header for General commands#######################################################
+
+atom_style    granular # define partículas granulares
+atom_modify   map array # otimiza mapeamento dos átomos
+boundary      f f f # fronteiras fixas nas três direções
+units         si # usa unidades SI
+communicate   single vel yes # comunica velocidades entre processadores
+newton        off # desativa terceira lei para contatos granulares
+processors    1 1 1 # 1 MPI rank per independent trial; 12 trials use 12 visible CPUs
+# Para rodar o LIGGGHTS:
+# mpirun -np 1 liggghts -in in.caracte
+
+###################################System variables##################################################################
+
+variable    xmin    index    -0.5 # limite mínimo em x
+variable    xmax    index     0.5 # limite máximo em x
+
+variable    ymin    index     0.99 # limite mínimo em y
+variable    ymax    index     5.0 # limite máximo em y
+
+variable    zmin    index    -0.5 # limite mínimo em z
+variable    zmax    index     0.5 # limite máximo em z
+
+variable dt equal 1e-4 # passo de tempo da simulação
+
+# Fórmula para aproximar dt
+# dt = 0.2 * (pi * R * sqrt(rho / (Y / (2 * (1 + nu))))) / (0.1631 * nu + 0.8766)
+# dt: timestep (s) | R: menor raio (m) | rho: densidade (kg/m3) | Y: Módulo de Young (Pa) | nu: Poisson
+
+
+###################################Variáveis específicas da simulação################################################
+
+variable natoms equal 4 # número de tipos de materiais
+
+
+#### Young Modulus ####
+
+variable youngmodulus1 equal 1e8 # módulo de Young do tipo 1
+variable youngmodulus2 equal 1e8 # módulo de Young do tipo 2
+variable youngmodulus3 equal 1e8 # módulo de Young do tipo 3
+variable youngmodulus4 equal 1e8 # módulo de Young do tipo 4
+
+
+#### Poisson ratio ####
+
+variable poisson1 equal 0.25 # coeficiente de Poisson do tipo 1
+variable poisson2 equal 0.3 # coeficiente de Poisson do tipo 2
+variable poisson3 equal 0.3 # coeficiente de Poisson do tipo 3
+variable poisson4 equal 0.3 # coeficiente de Poisson do tipo 4
+
+
+#### Coefficient of restitution ####
+
+variable 	CoR11 equal 0.10
+variable 	CoR12 equal 0.10
+variable 	CoR13 equal 0.30
+variable 	CoR14 equal 0.10
+variable 	CoR21 equal ${CoR12}
+variable 	CoR22 equal 0.1
+variable 	CoR23 equal 0.1
+variable 	CoR24 equal 0.1
+variable 	CoR31 equal ${CoR13}
+variable 	CoR32 equal ${CoR23}
+variable 	CoR33 equal 0.1
+variable 	CoR34 equal 0.1
+variable 	CoR41 equal ${CoR14}
+variable 	CoR42 equal ${CoR24}
+variable 	CoR43 equal ${CoR34}
+variable 	CoR44 equal 0.1
+
+#### Sliding friction coefficient ####
+#Alterar apenas os valores numéricos (lembre-se que alguns termos são simétricos)#
+
+variable	sf11	index	0.5 #DOE factor; source baseline from uploaded Ang Deslizamento.zip
+variable	sf12	index	0.45 #interação particula-superficie: dados advindos da calibração "parede"  na calibração histórica /
+variable	sf13	equal	0.45 #interação particula-particula: dados advindos da calibração "parede"  na calibração histórica / 
+variable	sf14	equal	0.0
+variable	sf21	equal	${sf12}
+variable	sf22	equal	0.0
+variable	sf23	equal	0.0
+variable	sf24	equal	0.0
+variable	sf31	equal	${sf13}
+variable	sf32	equal	${sf23}
+variable	sf33	equal	0.0
+variable	sf34	equal	0.0
+variable	sf41	equal	${sf14}
+variable	sf42	equal	${sf24}
+variable	sf43	equal	${sf34}
+variable	sf44	equal	0.0
+
+#### Rolling friction coefficient ####
+#Alterar apenas os valores numéricos (lembre-se que alguns termos são simétricos)#
+
+variable	rf11	index	1.0 # prepared LIGGGHTS starting guess; optimized, not Rocky equivalence
+variable	rf12	index	1.0 #interação particula-superficie: dados advindos da calibração "parede"
+variable	rf13	equal	1.0 #interação particula-superficie: dados advindos da calibração "parede"
+variable	rf14	equal	0.0
+variable	rf21	equal	${rf12}
+variable	rf22	equal	0.0
+variable	rf23	equal	0.0
+variable	rf24	equal	0.0
+variable	rf31	equal	${rf13}
+variable	rf32	equal	${rf23}
+variable	rf33	equal	0.0
+variable	rf34	equal	0.0
+variable	rf41	equal	${rf14}
+variable	rf42	equal	${rf24}
+variable	rf43	equal	${rf34}
+variable	rf44	equal	0.0
+
+####cohesivity energy density####	
+#Alterar apenas os valores numéricos (lembre-se que alguns termos são simétricos)#
+					
+variable	CED11	index	1000 #DOE factor; source baseline from uploaded Ang Deslizamento.zip
+variable	CED12	index	0
+variable	CED13	equal	0
+variable	CED14	equal	0.0			
+variable	CED21	equal	${CED12}			
+variable	CED22	equal	0.0	
+variable	CED23	equal	0.0
+variable	CED24	equal	0.0
+variable	CED31	equal	${CED13}
+variable	CED32	equal	${CED23}
+variable	CED33	equal	0.0
+variable	CED34	equal	0.0
+variable	CED41	equal	${CED14}
+variable	CED42	equal	${CED24}				
+variable	CED43	equal	${CED34}
+variable	CED44	equal	0.0
+
+
+#### Variáveis para as partículas ####
+
+### SEMPRE COLOCAR DO MENOR RAIO PARA O MAIOR!!!!!
+
+variable radiusnbr equal 0.005 #Tamanho otimizado
+
+variable nradii equal 7
+
+variable radius1 equal 0.250/2
+variable radius2 equal 0.275/2
+variable radius3 equal 0.325/2
+variable radius4 equal 0.375/2
+variable radius5 equal 0.425/2
+variable radius6 equal 0.475/2
+variable radius7 equal 0.525/2
+
+variable frac1 equal 0.930
+variable frac2 equal 0.030
+variable frac3 equal 0.005
+variable frac4 equal 0.005
+variable frac5 equal 0.010
+variable frac6 equal 0.005
+variable frac7 equal 0.015
+
+variable density equal 5280                # Densidade real da particula [kg/m3]
+
+variable nbrratio equal v_radius1/v_radiusnbr # razão das partículas para o valor da NBR
+
+
+#### Parâmetros de alimentação do sistema ####
+
+variable    simulationtime        equal    20 # duração máxima fixa; paragem por energia cinética não validada
+variable    filltime              equal    1 # tempo de alimentação
+variable charge_multiplier equal 1.5
+variable    fillmassrateth        equal    v_charge_multiplier*3.6*0.02*0.58*v_density*v_nbrratio*v_nbrratio*v_nbrratio # vazão mássica escalada em t/h
+variable    fillmassrate          equal    ${fillmassrateth}/3.6 # vazão mássica em kg/s
+variable    fillmass              equal    ${filltime}*${fillmassrate} # massa total inserida
+variable    fillsteps             equal    ${filltime}/${dt} # passos de alimentação
+variable    simulationsteps       equal    ${simulationtime}/${dt} # passos totais da simulação
+
+#### Movimentos ####
+
+variable tempo_remocao_base equal 3 # instante em que a base será removida da simulação
+
+variable steps_ate_remocao_base equal round((v_tempo_remocao_base-v_filltime)/v_dt) # passos entre o fim da alimentação e a remoção da base
+
+variable steps_finais equal round((v_simulationtime-v_tempo_remocao_base)/v_dt) # passos entre a remoção da base e o fim da simulação
+
+
+###################################Definition of simulation box#######################################################
+
+region reg block $(v_xmin*v_nbrratio) $(v_xmax*v_nbrratio) $(v_ymin*v_nbrratio) $(v_ymax*v_nbrratio) $(v_zmin*v_nbrratio) $(v_zmax*v_nbrratio) units box # cria região da simulação
+create_box ${natoms} reg # cria caixa com tipos de átomos
+
+variable neighborskin equal 0.02
+neighbor ${neighborskin} bin
+neigh_modify delay 0 every 1 check yes one 10000 page 100000
+
+
+###*###############################Contact Models - Cohesion SJКR #######*##################################*#######
+
+pair_style gran model hertz tangential history cohesion sjkr rolling_friction epsd2 tangential_reduce on
+
+pair_coeff * * # aplica modelo a todos os pares
+
+timestep ${dt} # define passo de tempo
+
+fix integrator all nve/sphere # integra movimento das esferas
+
+fix gravi all gravity 9.81 vector 0.0 -1.0 0.0 # aplica gravidade em y negativo
+
+fix ts_check all check/timestep/gran 1000 0.1 0.1
+
+
+###################################Definition of Material properties#################################################
+
+fix m1 all property/global youngsModulus peratomtype ${youngmodulus1} ${youngmodulus2} ${youngmodulus3} ${youngmodulus4} # define módulos de Young
+
+fix m2 all property/global poissonsRatio peratomtype ${poisson1} ${poisson2} ${poisson3} ${poisson4} # define coeficientes de Poisson
+
+fix m3 all property/global coefficientRestitution peratomtypepair ${natoms} ${CoR11} ${CoR12} ${CoR13} ${CoR14} ${CoR21} ${CoR22} ${CoR23} ${CoR24} ${CoR31} ${CoR32} ${CoR33} ${CoR34} ${CoR41} ${CoR42} ${CoR43} ${CoR44} # define restituição entre tipos
+
+fix m4 all property/global coefficientFriction peratomtypepair ${natoms} ${sf11} ${sf12} ${sf13} ${sf14} ${sf21} ${sf22} ${sf23} ${sf24} ${sf31} ${sf32} ${sf33} ${sf34} ${sf41} ${sf42} ${sf43} ${sf44} # define atrito deslizante
+
+fix m5 all property/global coefficientRollingFriction peratomtypepair ${natoms} ${rf11} ${rf12} ${rf13} ${rf14} ${rf21} ${rf22} ${rf23} ${rf24} ${rf31} ${rf32} ${rf33} ${rf34} ${rf41} ${rf42} ${rf43} ${rf44} # define atrito de rolamento
+
+fix m6 all property/global cohesionEnergyDensity peratomtypepair ${natoms} ${CED11} ${CED12} ${CED13} ${CED14} ${CED21} ${CED22} ${CED23} ${CED24} ${CED31} ${CED32} ${CED33} ${CED34} ${CED41} ${CED42} ${CED43} ${CED44}
+
+###################################Generation and Loading of the Geometry .stl#######################################
+
+fix base         all mesh/surface file meshes/base.stl         type 4 scale $(v_nbrratio)
+fix box          all mesh/surface file meshes/box.stl          type 2 scale $(v_nbrratio)
+fix paredes      all mesh/surface file meshes/walls.stl        type 4 scale $(v_nbrratio)
+
+fix walls all wall/gran model hertz tangential history cohesion sjkr rolling_friction epsd2 mesh n_meshes 3 meshes base box paredes tangential_reduce on # aplica o contato inicial à base, à caixa e às paredes
+
+###################################Generation and Insertion of the particles#########################################
+
+fix pts1 all particletemplate/sphere 10487 atom_type 1 density constant ${density} radius constant ${radius1}
+
+fix pts2 all particletemplate/sphere 11887 atom_type 1 density constant ${density} radius constant ${radius2}
+
+fix pts3 all particletemplate/sphere 32452843 atom_type 1 density constant ${density} radius constant ${radius3}
+
+fix pts4 all particletemplate/sphere 49979687 atom_type 1 density constant ${density} radius constant ${radius4}
+
+fix pts5 all particletemplate/sphere 67867967 atom_type 1 density constant ${density} radius constant ${radius5}
+
+fix pts6 all particletemplate/sphere 1000003 atom_type 1 density constant ${density} radius constant ${radius6}
+
+fix pts7 all particletemplate/sphere 20996011 atom_type 1 density constant ${density} radius constant ${radius7}
+
+fix pdd1 all particledistribution/discrete 86028121 ${nradii} pts1 ${frac1} pts2 ${frac2} pts3 ${frac3} pts4 ${frac4} pts5 ${frac5} pts6 ${frac6} pts7 ${frac7}
+
+fix    ins_mesh all mesh/surface/planar file meshes/inlet.stl type 1 scale $(v_nbrratio) # carrega superfície de inserção
+
+fix ins all insert/stream seed 86028157 distributiontemplate pdd1 mass ${fillmass} massrate ${fillmassrate} overlapcheck yes all_in yes vel constant 0 -1 0 insertion_face ins_mesh extrude_length $(1*v_nbrratio) # insere partículas por fluxo
+
+
+###################################Dumping of the data for post-processing to visualize##############################
+
+shell "mkdir -p post"
+
+variable dumptime equal 0.1
+variable dumpstep equal round(v_dumptime/v_dt)
+thermo ${dumpstep} # grava o progresso a cada 0,1 s
+thermo_style custom step time atoms ke # envia Step, Time, Atoms e energia cinética ao log
+thermo_modify flush yes # libera cada amostra para o log sem alterar o intervalo físico
+
+# No time-series STL dumps: the controller derives the scaled box bounds from this trial's source mesh/deck.
+# The single particle snapshot used for measurement is written after the final run below.
+
+####################################RUN the simulation###############################################################
+
+run ${fillsteps} # executa a alimentação das partículas de 0 a 1 segundo
+
+unfix ins # encerra a inserção de novas partículas
+
+unfix ins_mesh # remove a malha de inserção, pois ela não será mais utilizada
+
+run ${steps_ate_remocao_base} # mantém o sistema em repouso de 1 a 3 segundos com a base presente
+
+unfix walls # remove temporariamente o contato com a base, a caixa e as paredes
+
+unfix base # remove definitivamente a malha da base no instante de 3 segundos
+
+fix walls all wall/gran model hertz tangential history cohesion sjkr rolling_friction epsd2 mesh n_meshes 2 meshes box paredes tangential_reduce on # recria o contato somente com a caixa e as paredes
+
+
+
+run ${steps_finais} # executa o escoamento e a acomodação das partículas de 3 a 20 segundos sem a base
+
+write_dump all custom/vtk post/deslizamento_final.vtk id type x y z vx vy vz omegax omegay omegaz radius mass # snapshot final medido pelo controlador

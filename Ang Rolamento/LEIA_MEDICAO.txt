@@ -1,0 +1,52 @@
+ROLAMENTO V5 - VELOCIDADE TOTAL > 0.001 m/s
+
+SEQUENCIA FISICA (dt=1e-4 s)
+0 a 1 s: alimentacao fresca, sem reaproveitar restart de campanha antiga.
+1 a 3 s: assentamento; N0 fixado apos alimentacao, no passo 10000.
+3 a 10 s: copo/tampa sobe verticalmente a 0.025 m/s; as particulas continuam
+assentando simultaneamente, sem pausa extra de estabilizacao apos a subida.
+10 a 40 s: gravidade rotaciona de 0 a 90 graus a 3 graus/s.
+O relogio thermo pode reiniciar em zero ao ler restart; o tempo fisico desta
+sequencia e passo*dt. Angulo = max(0, passo-100000)*dt*3.
+
+CRITERIO E PARADA NATIVA
+Cada particula sobrevivente recebe voto 0/1 por
+sqrt(vx*vx+vy*vy+vz*vz) > 0.001 m/s. Igualdade nao conta.
+O denominador e N0 inicial, nunca o numero de sobreviventes. Perdidas nao
+contam como moveis e ficam registradas; ganho/retorno de IDs invalida os dados.
+A primeira amostra durante a inclinacao com moving/N0 >= 95% define o angulo.
+Checagens a cada 1000 passos (0.1 s; resolucao angular 0.3 graus).
+No mesmo passo sao escritos evento, particulas e STL da base; jump SELF
+rolling_done encerra imediatamente o restante do input com retorno normal.
+Nao ha 5 amostras consecutivas nem avanco ate 40 s depois do primeiro evento.
+Sem evento, a execucao termina em 40 s e a resposta e censurada, nao um angulo
+inventado. Movimento translacional coletivo nao comprova rolamento puro
+microscopico nem equivalencia a ANSYS.
+
+RETENCAO SOMENTE NOS TRIALS NOVOS AUTORIZADOS
+prepare_trial grava rolling_retention_owner.json antes das saidas. Somente o
+ultimo consumidor do trial aciona finalize_rolling_trial. Leitores e campanhas
+antigas nunca recebem exclusao automatica. Todos os frames do baseline ao
+passo final sao auditados: velocidades finitas, IDs, contagens, relogio e thermo.
+A cena usa particulas reais e STL emitido no evento, escala Z/Y igual e
+transferidor ao fundo; nao reconstrui uma simulacao ficticia.
+Antes de apagar qualquer dump: renderizar e decodificar PNG, salvar SVG,
+rolling_samples.csv, rolling_validation.json e rolling_retention.json duravel
+com hashes, passo, tempo, angulo, N0 e lista exata de arquivos descartaveis.
+Depois manter somente particles_<passo_medido>.dump; remover demais amostras
+e a duplicata rolling_event_particles.dump. Conservar STL, meshes, restart,
+thermo, evento, CSV, JSON e imagens. Numero de amostras depende da parada.
+Sem evento/imagem valida, corrupcao, nomes inesperados, links simbolicos,
+junctions/reparse points Windows, hardlinks ou caminho fora do trial: preservar
+dumps para diagnostico. JSON de autorizacao/manifesto deve ser objeto.
+Manifesto prepared permite retomar interrupcao apos validar tudo que resta;
+complete torna a operacao idempotente. Releitura verifica dump retido, hashes,
+CSV e thermo; velocidades descartadas nao podem ser recalculadas.
+
+COMPATIBILIDADE E IMAGENS
+V1/V2, V3 e V4 mantem seus leitores historicos e limites, nunca sao rebatizados
+V5. Campanha nova tem identidade V5 e nao reaproveita scores incompatíveis.
+DEM_RASTERIZER=cairosvg usa CairoSVG nativo (instalado no venv local). O modo
+Chrome legado continua disponivel; falha de renderizacao nao autoriza limpeza.
+Evidencias e ensaios reais isolados ficam fora do workspace, em ../evidence e
+../runs. Resultados antigos e entrega empresarial permanecem separados.

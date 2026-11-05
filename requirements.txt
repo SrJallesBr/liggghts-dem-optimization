@@ -1,0 +1,8 @@
+# Versions used by the software validation runtime (Python 3.12).
+numpy==2.5.4
+scipy==1.18.1
+matplotlib==3.11.2
+pytest==9.1.1
+# Browser-free SVG rasterization; native libcairo is also required (WSL: libcairo2).
+CairoSVG==2.9.1
+Pillow>=11.0

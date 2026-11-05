@@ -1,0 +1,276 @@
+{
+  "calibration_name": "fresh_independent_doe84_retry420_refine748_cap1000_20",
+  "tests": [
+    "discharge",
+    "repose",
+    "rolling"
+  ],
+  "optimization_mode": "joint_three_tests_per_trial",
+  "campaign": {
+    "doe_trials": 84,
+    "refinement_trials": 748,
+    "validation_trials": 0,
+    "max_trials": 1000
+  },
+  "doe_trials": 84,
+  "doe_execution_order": "configured_initial_then_manifest",
+  "minimum_doe_complete": 84,
+  "maximum_doe_attempts": 420,
+  "doe_contingency_batch_size": 12,
+  "refinement_trials": 748,
+  "validation_trials": 0,
+  "max_trials": 1000,
+  "model_candidate_pool": 6000,
+  "random_seed": 741419384,
+  "measurement_retry_limit": 0,
+  "cohesion_guard": {
+    "enabled": false,
+    "max_boundary_probes": 8
+  },
+  "parallel_trials": 20,
+  "adaptive_initial_inflight": 20,
+  "mpi_processes_per_trial": 1,
+  "mpi_processes": 1,
+  "simulation_launch_enabled": true,
+  "experimental_launch_authorized": true,
+  "target_discharge_deg": 73.4,
+  "target_repose_deg": 40.0,
+  "target_rolling_deg": 45.0,
+  "tolerance_deg": 1.0,
+  "weights": {
+    "discharge": 1.0,
+    "repose": 1.0,
+    "rolling": 0.25
+  },
+  "parameters": {
+    "sf11": {
+      "min": 0.2,
+      "max": 2.0,
+      "initial": 0.5
+    },
+    "rf11": {
+      "min": 0.2,
+      "max": 3.0,
+      "initial": 1.0
+    },
+    "CED11": {
+      "min": 0.0,
+      "max": 5000000.0,
+      "initial": 1000.0
+    },
+    "sf12": {
+      "min": 0.2,
+      "max": 2.0,
+      "initial": 0.45
+    },
+    "rf12": {
+      "min": 0.2,
+      "max": 2.0,
+      "initial": 1.0
+    },
+    "CED12": {
+      "min": 0.0,
+      "max": 10000.0,
+      "initial": 0
+    }
+  },
+  "fixed_parameters": {},
+  "parameter_groups": {
+    "discharge": [
+      "sf11",
+      "rf11",
+      "CED11",
+      "sf12",
+      "rf12",
+      "CED12"
+    ],
+    "repose": [
+      "sf11",
+      "rf11",
+      "CED11",
+      "sf12",
+      "rf12",
+      "CED12"
+    ],
+    "rolling": [
+      "sf11",
+      "rf11",
+      "CED11",
+      "sf12",
+      "rf12",
+      "CED12"
+    ]
+  },
+  "measurement": {
+    "version": "mean-profile-local-v2",
+    "response_policy": null,
+    "saor": {
+      "divisions_factor": 1.5,
+      "number_of_samples": 36,
+      "minimum_fit_r_squared": 0.9,
+      "retained_column_detection": true
+    },
+    "daor": {
+      "divisions_factor": 1.5,
+      "response_convention": "left_face",
+      "minimum_fit_r_squared": 0.9
+    },
+    "equivalence_to_ansys_verified": false,
+    "geometry_policy": "retained-column-snapshot-local-v1"
+  },
+  "method": "Sequential MOP-inspired model selection with scheduled global exploration; local implementation, not ANSYS proprietary or guaranteed optimum.",
+  "article_adaptation": "Local weighted objective; rolling weight .25 is provisional. Candidate acceptance is not independent physical validation.",
+  "calibration_ready": false,
+  "pending_validation": [
+    "ANSYS Calibration Suite scripts unavailable without login",
+    "DAOR sanitization and primary face convention not confirmed by source code",
+    "Local mean-profile v2 and user-assigned 90-degree responses are not validated as vendor-equivalent or physical vertical-face detection",
+    "Rolling V7: collective total translational speed > 0.001 m/s, first sampled 95% crossing of particles present at each sample; alive > 0 required. N0 retained for loss/integrity tracking. Boundary losses allowed. No physical parameter transfer validation."
+  ],
+  "experimental_warning": "Local sequential MOP-inspired fit, not proprietary ANSYS. Raw missing angles remain missing. Charge increase does not guarantee improved DAOR resolution. Only all three measured responses within +/-1 degree qualify as a candidate; independent seeded confirmation is required for convergence claims.",
+  "rolling_protocol": {
+    "version": "V7_PRESENT_POPULATION",
+    "fraction_denominator": "present_population",
+    "speed_threshold_m_s": 0.001,
+    "fraction_threshold": 0.95,
+    "consecutive_samples": 1,
+    "retention": "validated-event-image-v1",
+    "settle_s": [
+      1,
+      3
+    ],
+    "lift_s": [
+      3,
+      6
+    ],
+    "lift_speed_m_s": "mesh_height/3s",
+    "tilt_s": [
+      10,
+      40
+    ],
+    "tilt_rate_deg_s": 3.0,
+    "maximum_angle_deg": 90.0,
+    "early_stop": true,
+    "rest_s": [
+      6,
+      10
+    ]
+  },
+  "adaptive_doe_handoff": true,
+  "solver": "/usr/local/bin/liggghts",
+  "doe_attempt_multiplier": 5,
+  "directed_doe_backfill": {
+    "enabled": true,
+    "minimum_normalized_separation": 0.05,
+    "policy": "joint-six-dimensional-measurability-with-full-domain-and-high-cohesion-exploration-v1"
+  },
+  "charge_revision": {
+    "repose": 1.0,
+    "discharge": 1.5,
+    "density_unchanged": true,
+    "psd_unchanged": true,
+    "rolling_unchanged": true,
+    "note": "Fresh campaign only: discharge mass multiplier 1.5. No imported historical responses. Density, PSD and other assays unchanged; protocol equivalence is not verified."
+  },
+  "geometry_revision": {
+    "repose_tube_radial": 1.5,
+    "repose_tube_height": 0.5,
+    "repose_base_scale": 0.6,
+    "nbrratio": 25,
+    "deck_tube_scale": 1.25,
+    "discharge_z_relative_previous": 0.8,
+    "discharge_base_raw_length_z": 0.2
+  },
+  "doe_initial_point_policy": "configured_initial_replaces_first_lhs",
+  "prepared_report_reference": {
+    "document": "MC-1092KS-M-500008_Rev_0.doc",
+    "status": "USER_SELECTED_REPORT_REFERENCE_CURRENT_CONTACT_LAWS_PREPARE_ONLY",
+    "rolling_reference_deg": 45,
+    "rolling_coefficients": "LIGGGHTS initial guess only; not Rocky equivalence",
+    "unconfirmed_targets": [],
+    "moisture": "11% report moisture is not a direct CED conversion",
+    "nonrolling_fraction": "38.2% by mass flow within sphere streams only; not particle-count fraction and not transferred",
+    "report_stream_mass_flow_t_h": {
+      "Poli": 8,
+      "N_rot": 3056,
+      "rot": 4944
+    },
+    "nonrolling_sphere_stream_mass_fraction": 0.382,
+    "physical_material_transfer": "Existing LIGGGHTS material/PSD/shape retained by chosen approach; exact Rocky material/settings replication is not established.",
+    "selected_reference_targets": {
+      "repose_deg": 40.0,
+      "discharge_deg": 73.4,
+      "rolling_scenario_deg": 45.0
+    },
+    "target_interpretation": "40/73.4 selected report-comparison references, not laboratory means. 45 is the requested rolling scenario, not a measured bulk rolling target.",
+    "contact_law_decision": {
+      "normal": "hertz",
+      "tangential": "history",
+      "cohesion": "sjkr",
+      "rolling": "epsd2",
+      "explicit_liquid_bridges": false,
+      "scope": "Retain current contact laws; prepare only; no launch authorized."
+    }
+  },
+  "launch_status": "EXPLICIT_FRESH_LAUNCHER_ONLY",
+  "max_concurrent_simulations": 20,
+  "adaptive_max_inflight": 20,
+  "description": "Campanha nova independente; sem importacoes. Iniciar somente pelo launcher finito documentado.",
+  "adaptive_refinement_method": "sequential-mop-space-filling-v1",
+  "adaptive_refinement_history": [],
+  "adaptive_refinement": {
+    "minimum_distance": 0.01,
+    "candidate_pool": 6000,
+    "ei_draws": 128,
+    "seed": 7129
+  },
+  "sequential_experiment": {
+    "total_trial_slots": 1000,
+    "imported_doe_rows": 0,
+    "new_attempt_budget": 748,
+    "workers": 20,
+    "discharge_mass_multiplier": 1.5,
+    "recovery_policy": "fresh-owned-reservations-only",
+    "global_exploration_period": 5,
+    "max_consecutive_infrastructure_failures": 6,
+    "stop_on_joint_acceptance": true,
+    "convergence_claim": "joint target acceptance is candidate only; independently seeded confirmation required"
+  },
+  "assay_protocol_sha256": {
+    "discharge": {
+      "Ang Deslizamento/in.deslizamento": "bd3b5d5c5021f95c0e7378095bca2973e76fc49c76b82ff5200259254c3612c6",
+      "Ang Deslizamento/meshes/base.stl": "980e388e8c2468e20e9f640007c8ba6a648ba724ddc5c5eabef18434f57dcd49",
+      "Ang Deslizamento/meshes/box.stl": "f591af931362557e6af895d62f8bca7c60dd08fc9dc258b65077e80701e41a20",
+      "Ang Deslizamento/meshes/inlet.stl": "9ad8eb254b055609793bb6bf1f118a7f3c396e38b577e93280c7713f8cc20bb7",
+      "Ang Deslizamento/meshes/walls.stl": "b95c5b893ba33d213cdd34a8372297fb9a4acbe8183e0f2a4498c39a8a908e64"
+    },
+    "repose": {
+      "Ang Repouso/in.repouso": "5cdd4801811e461c696a45d6de8d0c13d4785fed12c05297bfa3a947ccc19039",
+      "Ang Repouso/initial_particles.data": "93972e909e05bd9e9b6d90e3699b63b6664a2b77b8aad0be5d19041229d76438",
+      "Ang Repouso/meshes/base_repouso_dir.stl": "885b1628b304c20fa068233ebcda3b739ca69d519cf544ab6a9c0b221f24e0eb",
+      "Ang Repouso/meshes/base_repouso_esq.stl": "3e6b46f20e9a53e93443ff64e2790b99e57ee4d04bd2f2dd938cdbedb21bee99",
+      "Ang Repouso/meshes/Container_Cylinder.stl": "ee5371a153e0db854b1029983e720e551b3c330f8436f4ec50092133404f1de4",
+      "Ang Repouso/meshes/inlet.stl": "c180aa0e1f318c67c3d7353cf688070d38c4d6d7817a291d3059060e613bd3e8",
+      "Ang Repouso/meshes/tubo.stl": "e44f88d7d565fcd01bc62285804cff1ff9f497bc68f52abe942955bc39187d9a",
+      "Ang Repouso/meshes/Upper_Tray.stl": "6c11c3c7f53205e3ab276c6b500a40abf30a9378133bb703d6459adf473768d0"
+    },
+    "rolling": {
+      "Ang Rolamento/in.fill_1s": "b558588d1e4358e4bfe0b8ba81a27f9f9a0333bd98313ff1cb9079b56b6729b2",
+      "Ang Rolamento/in.rolamento": "3428802206947943e03235849915b5815dcb776b8eb54fc1f54dd2503927cda6",
+      "Ang Rolamento/rolling_event_check.inc": "e2e3ff15272de1f59110a6719064122b263ad7e74e64f617f702ab49a4823f6f",
+      "Ang Rolamento/meshes/base.stl": "9f6d4ddef1f97c50a1e18448e80f71c3eb5967bcc56129facbfb1b1dd740b864",
+      "Ang Rolamento/meshes/copo.stl": "b0a3ae7cb97c7f52fffcff623f90541e33bea72ce39302fb3116e41522242d3f",
+      "Ang Rolamento/meshes/inlet.stl": "efdb84c5d0308c894f03e88710698f2ee3a4f2b507f5842ccfcbe572f35ef867"
+    }
+  },
+  "repose_output_policy": {
+    "output_policy_revision": "repose-final-measurement-only-local-default-ignore-v1",
+    "output_policy_first_trial_id": 593,
+    "output_policy_preserved_prepared_trials_through": 592,
+    "particle_dumps": "final-measurement-only",
+    "lost_particles_policy": "local-default-ignore",
+    "timing11_adopted": false
+  },
+  "first_trial_id": 1,
+  "fresh_finite_independent": true
+}

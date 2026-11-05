@@ -1,0 +1,111 @@
+{
+  "remaining_candidate_count_by_radius": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "height_bin_edges_m": [
+    0.0,
+    0.8125,
+    1.625,
+    2.4375,
+    3.25,
+    4.0625,
+    4.875,
+    5.6875,
+    6.5,
+    7.3125,
+    8.125
+  ],
+  "height_bin_particle_counts": [
+    161,
+    168,
+    177,
+    169,
+    173,
+    183,
+    184,
+    176,
+    174,
+    165
+  ],
+  "algorithm": "seeded PSD-deficit Cartesian candidate net; smallest-radius grid saturation",
+  "seed": 20261104,
+  "candidate_spacing_m": 0.0625,
+  "candidate_grid_exhausted_for_next_psd_class": true,
+  "next_blocked_radius_m": 0.2125,
+  "particle_count": 1730,
+  "radius_m": [
+    0.125,
+    0.1375,
+    0.1625,
+    0.1875,
+    0.2125,
+    0.2375,
+    0.2625
+  ],
+  "radius_counts": [
+    1677,
+    41,
+    4,
+    3,
+    2,
+    1,
+    2
+  ],
+  "expected_mass_fractions": [
+    0.93,
+    0.03,
+    0.005,
+    0.005,
+    0.01,
+    0.005,
+    0.015
+  ],
+  "actual_mass_fractions": [
+    0.9391322462844917,
+    0.030560158504466913,
+    0.004921344174328034,
+    0.005670073937764149,
+    0.005502631754318076,
+    0.003841090087814745,
+    0.010372455256816552
+  ],
+  "max_absolute_mass_fraction_error": 0.009132246284491607,
+  "density_kg_m3": 5280.0,
+  "total_mass_kg": 77136.3137487444,
+  "minimum_pair_clearance_m": 0.002665042944955287,
+  "minimum_wall_clearance_m": 5.884227973185219e-05,
+  "minimum_base_clearance_m": 9.999999994736442e-09,
+  "minimum_top_clearance_m": 0.04999999000000005,
+  "bounds_m": [
+    [
+      -7.8,
+      7.8
+    ],
+    [
+      -0.3,
+      16.55
+    ],
+    [
+      -7.8,
+      7.8
+    ]
+  ],
+  "no_replenishment": true,
+  "settled_or_stable_claim": false,
+  "initial_data_sha256": "93972e909e05bd9e9b6d90e3699b63b6664a2b77b8aad0be5d19041229d76438",
+  "Container_Cylinder.stl_minimum_triangle_clearance_m": 5.8842279731796676e-05,
+  "Upper_Tray.stl_minimum_triangle_clearance_m": 9.999999994736442e-09,
+  "tray_floor_m": 0.0,
+  "tray_rim_top_m": 0.3125,
+  "mesh_encoding": "ASCII converted with exact binary float vertices",
+  "source_binary_sha256": {
+    "Container_Cylinder.stl": "bf407cad58918944e35ecd7e4dfab2296834e0e499e5bc3163b7b6e7b9f00f76",
+    "Upper_Tray.stl": "c5d761b2a17abe82012353597479fbf7fd47b2fb27f12f57ce1fe54fe9e7b073"
+  }
+}

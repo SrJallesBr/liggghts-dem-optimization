@@ -1,0 +1,114 @@
+solid Upper_Tray.stl
+facet normal 0 0 1
+outer loop
+vertex 0 25 -600
+vertex -600 25 -600
+vertex 0 0 -600
+endloop
+endfacet
+facet normal 0 0 1
+outer loop
+vertex 0 0 -600
+vertex -600 25 -600
+vertex -600 0 -600
+endloop
+endfacet
+facet normal 0 0 1
+outer loop
+vertex 0 0 -600
+vertex 600 0 -600
+vertex 0 25 -600
+endloop
+endfacet
+facet normal 1 0 -0
+outer loop
+vertex -600 25 -600
+vertex -600 25 600
+vertex -600 0 -600
+endloop
+endfacet
+facet normal 0 1 0
+outer loop
+vertex -600 0 600
+vertex 0 0 -600
+vertex -600 0 -600
+endloop
+endfacet
+facet normal 0 1 0
+outer loop
+vertex 0 0 -600
+vertex 0 0 600
+vertex 600 0 -600
+endloop
+endfacet
+facet normal -0 0 1
+outer loop
+vertex 0 25 -600
+vertex 600 0 -600
+vertex 600 25 -600
+endloop
+endfacet
+facet normal 1 0 0
+outer loop
+vertex -600 0 -600
+vertex -600 25 600
+vertex -600 0 600
+endloop
+endfacet
+facet normal 0 1 0
+outer loop
+vertex 0 0 600
+vertex 0 0 -600
+vertex -600 0 600
+endloop
+endfacet
+facet normal 0 1 -0
+outer loop
+vertex 600 0 -600
+vertex 0 0 600
+vertex 600 0 600
+endloop
+endfacet
+facet normal -1 0 0
+outer loop
+vertex 600 0 600
+vertex 600 25 -600
+vertex 600 0 -600
+endloop
+endfacet
+facet normal -0 0 -1
+outer loop
+vertex 0 25 600
+vertex -600 0 600
+vertex -600 25 600
+endloop
+endfacet
+facet normal 0 0 -1
+outer loop
+vertex 0 0 600
+vertex -600 0 600
+vertex 0 25 600
+endloop
+endfacet
+facet normal 0 0 -1
+outer loop
+vertex 0 0 600
+vertex 600 25 600
+vertex 600 0 600
+endloop
+endfacet
+facet normal -1 -0 -0
+outer loop
+vertex 600 25 600
+vertex 600 25 -600
+vertex 600 0 600
+endloop
+endfacet
+facet normal 0 0 -1
+outer loop
+vertex 0 25 600
+vertex 600 25 600
+vertex 0 0 600
+endloop
+endfacet
+endsolid Upper_Tray.stl
