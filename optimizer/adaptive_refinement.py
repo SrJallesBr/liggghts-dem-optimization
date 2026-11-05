@@ -6,7 +6,7 @@ import json
 import math
 import os
 import time
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from pathlib import Path
 
@@ -97,7 +97,7 @@ def _distance(c, point, attempts):
                             for n, s in c.config['parameters'].items())) for a in attempts), default=math.inf)
 
 
-def _configured_budget_limit(controller, imported_count=None):
+def _configured_budget_limit(controller, imported_count=None, *, doe_records=None):
     """Hard campaign capacity, separate from the legacy 48-attempt initial default."""
     config = controller.config
     campaign = config['campaign']
@@ -105,7 +105,9 @@ def _configured_budget_limit(controller, imported_count=None):
     if type(refinement) is not int or refinement < 0:
         raise ValueError('configured refinement budget must be a nonnegative integer')
     if config.get('doe_attempt_multiplier') == 5:
-        records = controller._restore_async_doe_state()
+        # Only the owning DOE scheduler supplies live reservations. Offline
+        # callers retain strict orphan reconciliation through the normal restore.
+        records = controller._restore_async_doe_state() if doe_records is None else doe_records
         nonrefinement = sum(r['phase'] != 'refinement' for r in records.values())
         available = campaign['max_trials'] - nonrefinement
         if available < 0:
@@ -156,14 +158,14 @@ def _settings(c):
     return settings
 
 
-def _restore(c, budget, *, allow_inflight=False):
+def _restore(c, budget, *, allow_inflight=False, doe_records=None):
     root = c.run_root
     rows = score_rows(c, c._load_results_csv())
     ids = [int(r['trial_id']) for r in rows]
     if len(set(ids)) != len(ids) or any(i < 1 for i in ids):
         raise ValueError('duplicate/invalid result IDs')
     doe = [r for r in rows if r.get('phase') == 'doe']
-    if budget > _configured_budget_limit(c, imported_count=len(doe)):
+    if budget > _configured_budget_limit(c, imported_count=len(doe), doe_records=doe_records):
         raise ValueError('attempt budget exceeds configured campaign capacity')
     # A completed physical attempt may have no measurable angle. The proposer
     # validates measured training support; missing angles never require imputation.
@@ -191,7 +193,7 @@ def _restore(c, budget, *, allow_inflight=False):
     for e in events:
         kind = e['event']
         if kind == 'initialized':
-            initial_limit = _configured_budget_limit(c, imported_count=len(doe))
+            initial_limit = _configured_budget_limit(c, imported_count=len(doe), doe_records=doe_records)
             if 'sequential_experiment' not in c.config:
                 initial_limit = min(48, initial_limit)
             if type(e.get('budget')) is not int or not 0 <= e['budget'] <= initial_limit:
@@ -448,9 +450,15 @@ def authorize_budget_extension(controller, *, current_budget, additional_attempt
         return total
 
 
-def run_adaptive_refinement(controller, *, workers=1, budget=48, proposer=None, exact_12_new=False):
+def run_adaptive_refinement(controller, *, workers=1, budget=48, proposer=None, exact_12_new=False, doe_handoff=None):
     """Optionally nominate 12 new attempts, ignoring acceptance but not errors or limits."""
     c, root = controller, Path(controller.run_root)
+    if doe_handoff is not None and (c.config.get('fresh_finite_independent') is not True
+            or c.config.get('doe_attempt_multiplier') != 5 or exact_12_new
+            or workers != int(c.config.get('parallel_trials', 1))):
+        raise ValueError('live DOE handoff requires the finite campaign and its full shared worker pool')
+    doe_records = None if doe_handoff is None else doe_handoff['records']
+    doe_pending = {} if doe_handoff is None else doe_handoff['pending']
     if (type(exact_12_new) is not bool or type(budget) is not int or budget < 0
             or type(workers) is not int or not 1 <= workers <= min(20 if c.config.get('fresh_finite_independent') is True else 12, int(c.config.get('parallel_trials', 1)))
             or int(c.config['campaign'].get('validation_trials', -1)) != 0
@@ -459,7 +467,7 @@ def run_adaptive_refinement(controller, *, workers=1, budget=48, proposer=None, 
     initial_inflight = c.config.get('adaptive_initial_inflight', workers)
     if type(initial_inflight) is not int or not 1 <= initial_inflight <= workers:
         raise ValueError('adaptive_initial_inflight must be an integer in [1, workers]')
-    configured_limit = _configured_budget_limit(c)
+    configured_limit = _configured_budget_limit(c, doe_records=doe_records)
     if budget > configured_limit:
         raise ValueError('attempt budget exceeds configured campaign capacity')
     if 'sequential_experiment' in c.config and workers > c.config['sequential_experiment'].get('workers', 12):
@@ -480,7 +488,13 @@ def run_adaptive_refinement(controller, *, workers=1, budget=48, proposer=None, 
         continuation=authorized_continuation(c)
         if batch_path.exists() and not continuation:
             raise RuntimeError('exact12 batch already persisted; explicit reconciliation required')
-        rows, reserved, terminal, attempted, next_id = _restore(c, budget)
+        with c._csv_lock:
+            rows, reserved, terminal, attempted, next_id = _restore(c, budget, doe_records=doe_records)
+        if doe_handoff is not None:
+            # Include failed/rejected and live DOE proposals in distance checks,
+            # not just already measured points. IDs cover every durable reservation.
+            attempted.extend(doe_handoff['attempted'])
+            next_id = max(next_id, doe_handoff['next_id'])
         if batch_path.exists() and continuation:
             proof=reconcile_completed_batch(root,reserved,terminal)
             (root/'repose_continuation.json').write_text(json.dumps(proof,indent=2))
@@ -501,7 +515,7 @@ def run_adaptive_refinement(controller, *, workers=1, budget=48, proposer=None, 
                 handle.flush()
                 os.fsync(handle.fileno())
             _sync_directory(root)
-        active = {}
+        active = {} if doe_handoff is None else doe_handoff['active']
         # Historical terminal rows never release this invocation's startup gate.
         startup_feedback_received = False
         max_inflight_observed = 0
@@ -530,8 +544,28 @@ def run_adaptive_refinement(controller, *, workers=1, budget=48, proposer=None, 
             return report
         try:
             summary('running')
-            with ThreadPoolExecutor(max_workers=workers) as executor:
+            pool = ThreadPoolExecutor(max_workers=workers) if doe_handoff is None else nullcontext(doe_handoff['executor'])
+            with pool as executor:
                 pending = {}
+
+                def ingest_doe(ready):
+                    nonlocal rows
+                    if not ready:
+                        return
+                    doe_handoff['ingest'](ready)
+                    # Workers only append. Reload under the writer lock; preserve
+                    # derived failed-refinement rows that have no measured CSV row.
+                    with c._csv_lock:
+                        measured = score_rows(c, [r for r in c._load_results_csv() if r.get('phase') == 'doe'])
+                    # Refinement futures are ingested only by their own journal
+                    # path. Reloading them here could duplicate a concurrent row.
+                    rows = measured + [r for r in rows if r.get('phase') != 'doe']
+                    summary('running')
+                    if doe_handoff['failed']():
+                        raise RuntimeError('technical error in in-flight DOE; draining campaign')
+
+                def all_pending():
+                    return set(pending) | set(doe_pending)
 
                 def ingest(ready):
                     nonlocal startup_feedback_received
@@ -592,20 +626,24 @@ def run_adaptive_refinement(controller, *, workers=1, budget=48, proposer=None, 
                 try:
                     while True:
                         from .transition_guards import drain_requested
+                        ready_doe = {f for f in doe_pending if f.done()}
+                        if ready_doe:
+                            ingest_doe(ready_doe)
+                            continue
                         ready = {f for f in pending if f.done()}
                         if ready:
                             ingest(ready)
                             continue  # Re-scan completions before ANY nomination or refill.
                         stop = (drain_requested(root) or len(reserved) >= (invocation_target if exact_12_new else review_limit)
                                 or (not exact_12_new and any(_accepted(c, r) for r in rows)))
-                        if not pending and stop:
+                        if not all_pending() and stop:
                             break
                         effective_inflight_limit = workers if startup_feedback_received else initial_inflight
-                        if not stop and len(pending) < effective_inflight_limit:
+                        if not stop and len(all_pending()) < effective_inflight_limit:
                             point, diagnostics = proposer(c, rows, attempted, proposal_index=len(reserved))
                             if drain_requested(root):
                                 continue  # Discard nominations prepared before the drain request.
-                            if any(f.done() for f in pending):
+                            if any(f.done() for f in all_pending()):
                                 continue  # A result arrived during fitting: discard and refit.
                             point = _point(c, point, exact=True)
                             minimum = float(c.config.get('adaptive_min_distance', .01))
@@ -615,7 +653,7 @@ def run_adaptive_refinement(controller, *, workers=1, budget=48, proposer=None, 
                             tid, next_id = next_id, next_id+1
                             event = dict(event='reserved', trial_id=tid, parameters=point, model_revision=len(rows),
                                          observed_result_ids=[int(r['trial_id']) for r in rows], diagnostics=diagnostics,
-                                         pending_trial_ids=sorted(pending.values()),
+                                         pending_trial_ids=sorted(list(pending.values()) + [v[0] for v in doe_pending.values()]),
                                          effective_inflight_limit=effective_inflight_limit,
                                          startup_feedback_received=startup_feedback_received,
                                          min_distance=distance, seeds=c._trial_seeds(tid), reserved_at=time.time())
@@ -626,22 +664,27 @@ def run_adaptive_refinement(controller, *, workers=1, budget=48, proposer=None, 
                                              message='durable adaptive reservation')
                             active[tid] = dict(phase='refinement', status='preparing', started_at=time.time())
                             pending[executor.submit(c.execute_trial, tid, point, 'refinement', event['seeds'])] = tid
-                            max_inflight_observed = max(max_inflight_observed, len(pending))
+                            max_inflight_observed = max(max_inflight_observed, len(all_pending()))
                             write_live_status_csv(root, active)
                             summary('running')
                             continue
                         refresh_live_state(root, active)
                         write_live_status_csv(root, active)
                         render_dashboard(active, len(terminal), budget)
-                        done, _ = wait(pending, timeout=10, return_when=FIRST_COMPLETED)
-                        ingest(set(done) | {f for f in pending if f.done()})
+                        wait(all_pending(), timeout=10, return_when=FIRST_COMPLETED)
+                        ingest_doe({f for f in doe_pending if f.done()})
+                        ingest({f for f in pending if f.done()})
                 except BaseException:
                     # Drain and journal workers even when proposing/status updates fail.
                     # No cancellation and no results.csv rewrite while a worker exists.
-                    while pending:
-                        done, _ = wait(pending, timeout=10, return_when=FIRST_COMPLETED)
+                    while all_pending():
+                        wait(all_pending(), timeout=10, return_when=FIRST_COMPLETED)
                         try:
-                            ingest(set(done) | {f for f in pending if f.done()})
+                            ingest_doe({f for f in doe_pending if f.done()})
+                        except Exception:
+                            pass  # Outcomes are durable; preserve the original error.
+                        try:
+                            ingest({f for f in pending if f.done()})
                         except Exception:
                             # Each invalid result is already journaled; preserve the
                             # exception that originally triggered draining.

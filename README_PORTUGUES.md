@@ -47,6 +47,9 @@ DEM e não certifica compatibilidade física do solver.
   pontos, com teto de 420 tentativas DOE; não há repetição ilimitada.
 - O refinamento começa somente depois de satisfeito o DOE e sua verificação
   de prontidão. Reutiliza o refinador/modelo substituto finito do projeto.
+  Enquanto faltar DOE válido, mantém a ocupação dos 20 workers; ao atingir o
+  requisito, preserva DOE em voo e preenche as vagas livres com refinamentos.
+  Veja `PARALELISMO_CONTINUO.md` para aplicação segura e limites da atualização.
 - Até 748 tentativas de refinamento, reduzidas se necessário para não superar
   1000 tentativas totais DOE + refinamento. Ex.: com 420 tentativas DOE restam
   no máximo 580 de refinamento. Os tetos não são metas obrigatórias.

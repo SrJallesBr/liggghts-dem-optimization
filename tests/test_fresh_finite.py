@@ -42,7 +42,7 @@ class FreshFiniteTests(unittest.TestCase):
         self.assertEqual(len(c.initial_doe_points()),84)
         self.assertEqual(len({c._point_key(p) for p in c.initial_doe_points()}),84)
 
-    def test_retry_to_84_no_overshoot_and_restart(self):
+    def test_retry_to_84_preserves_extra_inflight_and_restart(self):
         c=self.controller()
         def fake(tid,p,phase='doe',seeds=None):
             if tid < 11:
@@ -51,13 +51,15 @@ class FreshFiniteTests(unittest.TestCase):
         with patch.object(c,'execute_trial',side_effect=fake):
             rows=c.run_doe()
         records=c._restore_async_doe_state()
-        self.assertEqual(len(records),94)
-        self.assertEqual(sum(c._valid_responses(r) for r in rows),84)
+        self.assertGreaterEqual(len(records),94)
+        self.assertLessEqual(len(records),113)
+        self.assertEqual(sum(c._valid_responses(r) for r in rows),len(records)-10)
+        self.assertEqual(len({c._point_key(r['parameters']) for r in records.values()}),len(records))
         self.assertTrue(c._doe_is_ready(rows))
         fresh.verify_isolation(self.root)
         with patch.object(c,'execute_trial',side_effect=AssertionError('resume launched duplicate')):
             c.run_doe()
-        self.assertEqual(len(c._restore_async_doe_state()),94)
+        self.assertEqual(len(c._restore_async_doe_state()),len(records))
 
     def test_doe_cap420_never_refines_insufficient_data(self):
         c=self.controller()

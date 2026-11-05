@@ -1598,7 +1598,7 @@ class CalibrationController:
             raise ValueError('unknown DOE initial point policy: ' + str(policy))
         return points
 
-    def _run_doe_async(self):
+    def _run_doe_async(self, *, handoff=None):
         records = self._restore_async_doe_state()
         self._next_trial_id = max(max(records, default=0)+1, int(self.config.get('first_trial_id', 1)))
         cap = int(self.config['maximum_doe_attempts'])
@@ -1677,7 +1677,8 @@ class CalibrationController:
         def score():
             if self.config.get('doe_attempt_multiplier') == 5:
                 from optimizer.adaptive_refinement import score_rows
-                return score_rows(self, self._load_results_csv())
+                with self._csv_lock:
+                    return score_rows(self, self._load_results_csv())
             # execute_trial appends from worker threads. Never rewrite results.csv
             # while another worker appends a completed measurement.
             with self._csv_lock:
@@ -1698,9 +1699,21 @@ class CalibrationController:
                     valid_count = sum(r.get('phase') == 'doe' and self._valid_responses(r) for r in scored)
                     target = int(self.config.get('minimum_doe_complete', self.config['campaign']['doe_trials']))
                     if finite:
-                        # Reserve at most the missing valid points; wait for feedback before refill.
+                        # Occupancy is independent of the missing-valid count.
+                        # All reservations still count against both attempt caps.
                         capped = capped or len(records) >= int(self.config['campaign']['max_trials'])
                         if valid_count >= target:
+                            if not stop_dispatch and handoff is not None and self._doe_is_ready(scored):
+                                # The executor and its DOE futures remain owned by this
+                                # scope. Refinement borrows free slots, never relaunches
+                                # or cancels an in-flight DOE, and returns after drain.
+                                handoff(dict(executor=executor, pending=pending, active=active,
+                                             ingest=ingest, failed=lambda: stop_dispatch,
+                                             records=records, attempted=list(attempted),
+                                             next_id=self._next_trial_id))
+                                if pending:
+                                    raise RuntimeError('handoff returned with undrained DOE futures')
+                                break
                             stop_dispatch = True
                     elif initial_finished and not (capped and pending):
                         stop_dispatch = True
@@ -1708,11 +1721,11 @@ class CalibrationController:
                         break
                     if not stop_dispatch and shutil.disk_usage(self.run_root).free < 15 * 1024**3:
                         stop_dispatch = True  # Preserve disk headroom; finish active cases only.
-                    if not stop_dispatch and not capped and len(pending) < workers and (not finite or valid_count + len(pending) < target):
+                    if not stop_dispatch and not capped and len(pending) < workers:
                         proposal_revision = None
                         if initial_queue:
                             initial_index, point = initial_queue[0]
-                        elif not initial_active and finite:
+                        elif finite:
                             # A per-ID deterministic stream survives restarts and excludes all history.
                             initial_index = None
                             rng = random.Random(int(self.config.get('random_seed', 1)) * 1000003 + self._next_trial_id)
@@ -1753,6 +1766,7 @@ class CalibrationController:
                             if not self._commit_doe_reservation(event, proposal_revision, pending):
                                 continue
                             attempts.add(tid)
+                            attempted.append(point)
                             observed.add(self._point_key(point))
                             records[tid] = dict(phase='doe', parameters=point, terminal=None)
                             self._next_trial_id += 1
@@ -1786,7 +1800,7 @@ class CalibrationController:
         # a separate decision; no adaptive replacements or calibration run.
         return scored
 
-    def run_doe(self) -> list[dict]:
+    def run_doe(self, *, handoff=None) -> list[dict]:
         if not self.config.get('maximum_doe_attempts'):
             return self._run_doe_legacy()
         import fcntl
@@ -1794,7 +1808,7 @@ class CalibrationController:
         with (self.run_root/'.doe_scheduler.lock').open('a') as lock:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
             try:
-                return self._run_doe_async()
+                return self._run_doe_async(handoff=handoff)
             finally:
                 fcntl.flock(lock, fcntl.LOCK_UN)
 

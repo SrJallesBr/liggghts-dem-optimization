@@ -49,11 +49,18 @@ def verify_isolation(root):
 
 
 def run(c):
-    rows=c.run_doe()
-    if not c._doe_is_ready(rows):return {'status':'doe_insufficient','refinement_started':False}
     from optimizer.adaptive_refinement import _configured_budget_limit
+    refinement=[]
+    def handoff(live):
+        budget=_configured_budget_limit(c,doe_records=live['records'])
+        refinement.append(run_adaptive_refinement(c,workers=int(c.config['parallel_trials']),budget=budget,doe_handoff=live))
+    rows=c.run_doe(handoff=handoff)
+    if refinement:
+        summary=refinement[0]
+        return {'status':summary['status'],'refinement_started':True,'refinement':summary}
+    if not c._doe_is_ready(rows):return {'status':'doe_insufficient','refinement_started':False}
     budget=_configured_budget_limit(c)
-    summary=run_adaptive_refinement(c,workers=20,budget=budget)
+    summary=run_adaptive_refinement(c,workers=int(c.config['parallel_trials']),budget=budget)
     return {'status':summary['status'],'refinement_started':True,'refinement':summary}
 
 
