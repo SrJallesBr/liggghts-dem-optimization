@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+run/
+.fresh-doe.lock
+*.log
+*.zip
+.venv/
+venv/
+.env
+.env.*
